@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>RATS</title>
+  <style>
+    /* HARSH, CLASSIC SANS-SERIF — NO BUBBLY, NO AI POLISH */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background-color: #000000;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Arial', 'Helvetica', 'Helvetica Neue', sans-serif;
+      font-weight: normal;
+      padding: 1.2rem;
+    }
+
+    .core {
+      max-width: 800px;
+      width: 100%;
+      background: #000000;
+      text-align: center;
+      padding: 1.8rem 1rem 2.8rem 1rem;
+      border: none;
+      box-shadow: none;
+    }
+
+    /* title block: each line with its own underline */
+    .title-block {
+      display: inline-block;
+      width: auto;
+      margin-bottom: 1.8rem;
+    }
+
+    /* RATS: small underline directly under the text */
+    .album-title {
+      font-size: clamp(3rem, 13vw, 5.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      text-transform: uppercase;
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      background: #000;
+      line-height: 1;
+      display: block;
+      padding-bottom: 0.2rem;
+      border-bottom: 2px solid #ffffff;   /* small line (2px) under RATS */
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* 20 SONGS: bigger line underneath */
+    .track-count {
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 3px;
+      color: #aaaaaa;
+      text-transform: uppercase;
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      background: #000;
+      display: block;
+      margin-top: 0.6rem;
+      padding-bottom: 0.2rem;
+      border-bottom: 4px solid #ffffff;   /* bigger line (4px) under 20 SONGS */
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .image-frame {
+      margin: 0 auto 2.2rem auto;
+      max-width: 540px;
+      width: 100%;
+      background: #000000;
+      border: 1px solid #1f1f1f;
+      padding: 0.6rem;
+    }
+
+    .rats-visual {
+      width: 100%;
+      max-width: 480px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      image-rendering: crisp-edges;
+      background: #000;
+      transition: none;
+    }
+
+    .countdown-area {
+      margin-top: 1.2rem;
+      border-top: 1px solid #171717;
+      padding-top: 1.8rem;
+    }
+
+    .timer-raw {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.2rem;
+      row-gap: 1.4rem;
+    }
+
+    .time-slot {
+      background: #000000;
+      border: 1px solid #2a2a2a;
+      min-width: 75px;
+      padding: 0.5rem 0.2rem;
+      text-align: center;
+    }
+
+    .num {
+      font-size: 2.8rem;
+      font-weight: 700;
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      color: #ffffff;
+      line-height: 1;
+      letter-spacing: 0;
+      margin-bottom: 0.2rem;
+    }
+
+    .unit {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      color: #6a6a6a;
+      letter-spacing: 1.5px;
+      font-weight: 400;
+      font-family: 'Arial', 'Helvetica', sans-serif;
+    }
+
+    .released-state {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #ffffff;
+      border: 1px solid #ffffff;
+      display: inline-block;
+      padding: 0.6rem 1.6rem;
+      background: #000;
+      letter-spacing: 1px;
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      margin-top: 0.3rem;
+    }
+
+    /* hidden audio player — no visible controls */
+    .bg-audio {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="core">
+  <div class="title-block">
+    <span class="album-title">RATS</span>
+    <span class="track-count">20 SONGS</span>
+  </div>
+
+  <div class="image-frame">
+    <img id="artwork" class="rats-visual" alt="RATS sequence" src="">
+  </div>
+
+  <div class="countdown-area">
+    <div class="timer-raw" id="timerGrid">
+      <div class="time-slot"><div class="num" id="days">00</div><div class="unit">DAYS</div></div>
+      <div class="time-slot"><div class="num" id="hours">00</div><div class="unit">HOURS</div></div>
+      <div class="time-slot"><div class="num" id="minutes">00</div><div class="unit">MIN</div></div>
+      <div class="time-slot"><div class="num" id="seconds">00</div><div class="unit">SEC</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- hidden background audio (autoplay, loop) -->
+<audio id="bgTrack" class="bg-audio" autoplay loop preload="auto">
+  <source src="https://www.image2url.com/r2/default/audio/1780860489953-35f1fdff-ec80-429a-97ea-7dc8ae62bcb8.m4a" type="audio/mp4">
+  Your browser does not support the audio element.
+</audio>
+
+<script>
+  (function() {
+    // IMAGE SEQUENCE (exact order as provided)
+    const imageSequence = [
+      "https://media.discordapp.net/attachments/1317858604866338816/1512123538767872195/F3CCDBE4-FC50-43B7-9E97-D1BB7B3B2E23.png?ex=6a263e09&is=6a24ec89&hm=41538bd7d0f8c7d2670bebfa3cf69b96ab8ea5fae031a86df3a3d9dcb3ce68d0&=&format=webp&quality=lossless&width=350&height=350",
+      "https://cdn.discordapp.com/attachments/1317858604866338816/1512123550176248009/349760AE-B88D-465E-B923-A09404DE8025.png?ex=6a263e0c&is=6a24ec8c&hm=626cbe48cd659105712d592ef748d8701c58e269514dc263e1c5002512d63fc9&",
+      "https://media.discordapp.net/attachments/1317858604866338816/1512123553523175445/DAB5FACE-F523-43DA-8D3D-99ACF203038D.png?ex=6a263e0d&is=6a24ec8d&hm=8914a71d2a70d46507c81e224cf766afe844a90193cb1d0a4d79289d725cd40a&=&format=webp&quality=lossless&width=1008&height=1008",
+      "https://media.discordapp.net/attachments/1317858604866338816/1512123556396273845/FFADA6C3-4FD9-41E7-9A11-C5D1C4AC0257.png?ex=6a263e0d&is=6a24ec8d&hm=91f8ffdc0387fd86b76e59fb8cca0708e83a05e480ee78835acd8c4456690e18&=&format=webp&quality=lossless&width=1008&height=1008"
+    ];
+
+    const imgElement = document.getElementById('artwork');
+    if (!imgElement) console.error('image element missing');
+
+    // Preload all images
+    function preloadAll(images) {
+      images.forEach(url => {
+        const cacheImg = new Image();
+        cacheImg.src = url;
+      });
+    }
+
+    // LOOP: change image every 0.7 seconds — infinite, correct order
+    let currentIdx = 0;
+    let imageInterval = null;
+
+    function startImageLoop() {
+      if (!imgElement) return;
+      imgElement.src = imageSequence[0];
+      currentIdx = 0;
+
+      if (imageInterval) clearInterval(imageInterval);
+
+      imageInterval = setInterval(() => {
+        currentIdx = (currentIdx + 1) % imageSequence.length;
+        if (imgElement) {
+          imgElement.src = imageSequence[currentIdx];
+        }
+      }, 700); // 0.7 seconds
+    }
+
+    // ---------- COUNTDOWN : JULY 3RD, 2026 (local midnight) ----------
+    const TARGET_DATE = new Date(2026, 6, 3, 0, 0, 0); // July 3 2026, 00:00:00 local
+
+    const daysSpan = document.getElementById('days');
+    const hoursSpan = document.getElementById('hours');
+    const minutesSpan = document.getElementById('minutes');
+    const secondsSpan = document.getElementById('seconds');
+    const timerContainer = document.getElementById('timerGrid');
+
+    let countdownTick = null;
+
+    function updateCountdown() {
+      const now = new Date();
+      const diffMs = TARGET_DATE - now;
+
+      if (diffMs <= 0) {
+        if (countdownTick) {
+          clearInterval(countdownTick);
+          countdownTick = null;
+        }
+        if (timerContainer && !document.getElementById('rawReleased')) {
+          timerContainer.innerHTML = '';
+          const releasedDiv = document.createElement('div');
+          releasedDiv.id = 'rawReleased';
+          releasedDiv.className = 'released-state';
+          releasedDiv.textContent = 'RELEASED';
+          timerContainer.appendChild(releasedDiv);
+        }
+        return;
+      }
+
+      const totalSeconds = Math.floor(diffMs / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      if (daysSpan) daysSpan.textContent = days < 10 ? '0' + days : days;
+      if (hoursSpan) hoursSpan.textContent = hours < 10 ? '0' + hours : hours;
+      if (minutesSpan) minutesSpan.textContent = minutes < 10 ? '0' + minutes : minutes;
+      if (secondsSpan) secondsSpan.textContent = seconds < 10 ? '0' + seconds : seconds;
+    }
+
+    function initCountdown() {
+      updateCountdown();
+      if (countdownTick) clearInterval(countdownTick);
+      countdownTick = setInterval(updateCountdown, 1000);
+    }
+
+    // ---------- BACKGROUND AUDIO: ensure autoplay (browsers may block, but we try) ----------
+    function initAudio() {
+      const audio = document.getElementById('bgTrack');
+      if (!audio) return;
+      // set volume to reasonable level
+      audio.volume = 0.7;
+      // attempt to play (autoplay attribute already there, but some browsers need a user gesture)
+      // we also add a fallback: on first user click anywhere, play if not already playing
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // autoplay blocked: add a one-time click handler to start audio
+          const startAudio = () => {
+            audio.play().then(() => {
+              document.removeEventListener('click', startAudio);
+              document.removeEventListener('touchstart', startAudio);
+            }).catch(e => console.log("audio play still blocked"));
+          };
+          document.addEventListener('click', startAudio);
+          document.addEventListener('touchstart', startAudio);
+        });
+      }
+    }
+
+    // ---------- INIT EVERYTHING ----------
+    function init() {
+      preloadAll(imageSequence);
+      startImageLoop();
+      initCountdown();
+      initAudio();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    window.addEventListener('beforeunload', () => {
+      if (imageInterval) clearInterval(imageInterval);
+      if (countdownTick) clearInterval(countdownTick);
+    });
+  })();
+</script>
+</body>
+</html>
